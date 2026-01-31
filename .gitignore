@@ -1,0 +1,55 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+.log
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+
+# Dépendances (TRÈS LOURD - NE JAMAIS ENVOYER)
+node_modules/
+
+# Build React (généré automatiquement)
+dist/
+dist-ssr/
+
+# Build Electron (généré automatiquement - contient les .exe)
+release/
+out/
+
+# Environnement (clés secrètes)
+.env
+.env.local
+.env.*.local
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Editeurs
+.vscode/
+.idea/
