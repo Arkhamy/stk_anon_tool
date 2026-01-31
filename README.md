@@ -56,7 +56,7 @@ Lancez l'installation (l'application se lancera automatiquement).
 Pré-requis : Node.js (v18+) et Git.
 
 ### 1. Cloner le dépôt
-git clone [https://github.com/VOTRE_PSEUDO/stk-anon-tool.git](https://github.com/VOTRE_PSEUDO/stk-anon-tool.git)
+git clone [https://github.com/Arkhamy/stk-anon-tool.git](https://github.com/VOTRE_PSEUDO/stk-anon-tool.git)
 cd stk-anon-tool
 
 ### 2. Installer les dépendances
