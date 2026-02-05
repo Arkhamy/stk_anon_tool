@@ -40,13 +40,19 @@ Tableau de bord principal
 
 ## 🛠️ Installation
 
-Pour les utilisateurs (Windows)
+Pour les utilisateurs (Windows / Debian)
 
 Allez dans la section Releases (colonne de droite).
 
 Téléchargez le fichier STK Anon Setup x.x.x.exe de la dernière version.
 
+**Pour Windows :**
+
 https://github.com/Arkhamy/stk_anon_tool/releases/download/v1.7.2/STK.Anon.Setup.1.7.2.exe
+
+**Pour Debian :**
+
+https://github.com/Arkhamy/stk_anon_tool/releases/download/v1.7.2.Deb/stk-anon-tool_1.7.2_amd64.deb
 
 Lancez l'installation (l'application se lancera automatiquement).
 
@@ -56,7 +62,9 @@ Lancez l'installation (l'application se lancera automatiquement).
 Pré-requis : Node.js (v18+) et Git.
 
 ### 1. Cloner le dépôt
-git clone [https://github.com/Arkhamy/stk-anon-tool.git](https://github.com/VOTRE_PSEUDO/stk-anon-tool.git)
+
+git clone https://github.com/Arkhamy/stk-anon-tool
+
 cd stk-anon-tool
 
 ### 2. Installer les dépendances
