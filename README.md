@@ -46,7 +46,7 @@ Allez dans la section Releases (colonne de droite).
 
 Téléchargez le fichier STK Anon Setup x.x.x.exe de la dernière version.
 
-https://github.com/Arkhamy/stk_anon_tool/releases/download/v1.7.0/STK.Anon.Setup.1.7.0.exe
+https://github.com/Arkhamy/stk_anon_tool/releases/download/v1.7.2/STK.Anon.Setup.1.7.2.exe
 
 Lancez l'installation (l'application se lancera automatiquement).
 
