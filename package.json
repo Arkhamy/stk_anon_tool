@@ -1,10 +1,11 @@
 {
   "name": "stk-anon-tool",
   "private": true,
-  "version": "1.7.0",
+  "version": "1.7.2",
   "description": "STK Anon - Outil de protection de la vie privée et anonymisation",
-  "author": "STK",
-  "main": "electron/main.js",
+  "author": "SentryKat",
+  "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -36,7 +37,7 @@
       "target": "deb",
       "icon": "public/logo.png",
       "category": "Utility",
-      "maintainer": "STK"
+      "maintainer": "SentryKat <contact@sentrykat.com>"
     }
   },
   "dependencies": {

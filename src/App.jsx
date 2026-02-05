@@ -3,10 +3,13 @@ import { Shield, EyeOff, Download, Upload, Type, Eraser, FileText, X, AlertTrian
 
 /**
  * STK Anon - Secure Privacy Tool (Desktop Engine)
- * Version 1.7
+ * Version 1.7.2
+ * * CHANGELOG:
+ * - UI: Removed orange border around custom logo for cleaner look
+ * - FEAT: Staggered watermark layout (Quinconce pattern)
  */
 
-// --- UTILITAIRES SYSTÈME ---
+// --- SYSTEM UTILITIES ---
 
 const loadScript = (src) => {
   return new Promise((resolve, reject) => {
@@ -22,7 +25,7 @@ const loadScript = (src) => {
   });
 };
 
-// --- COMPOSANTS UI ---
+// --- UI COMPONENTS ---
 
 const Card = ({ children, className = "" }) => (
   <div className={`bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden shadow-xl ${className}`}>
@@ -71,10 +74,10 @@ const Slider = ({ label, value, min, max, step = 1, onChange }) => (
   </div>
 );
 
-// --- CŒUR DE L'APPLICATION ---
+// --- CORE APPLICATION ---
 
 export default function App() {
-  // États de l'application
+  // Application States
   const [file, setFile] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [isPdf, setIsPdf] = useState(false);
@@ -82,12 +85,12 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressText, setProgressText] = useState("");
   
-  // États PDF spécifiques
+  // Specific PDF States
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
 
-  // États Métadonnées étendues
+  // Extended Metadata States
   const [metaInfo, setMetaInfo] = useState({ 
     width: 0, 
     height: 0, 
@@ -97,17 +100,18 @@ export default function App() {
     gps: 'Non détecté' 
   });
 
-  // Configuration Filigrane
+  // Watermark Configuration
   const [wmText, setWmText] = useState("CONFIDENTIEL");
   const [wmSize, setWmSize] = useState(40);
   const [wmOpacity, setWmOpacity] = useState(0.3);
-  const [wmDensity, setWmDensity] = useState(150);
+  const [wmDensity, setWmDensity] = useState(150); // Controls Vertical Spacing (Lines)
+  const [wmSpacing, setWmSpacing] = useState(100); // Controls Horizontal Spacing (Text)
   const [wmColor, setWmColor] = useState("#808080");
   const [wmRotate, setWmRotate] = useState(-45);
 
-  // Configuration Caviardage
+  // Redaction Configuration
   const [rects, setRects] = useState([]); 
-  // Stockage des rects pour TOUTES les pages : { 1: [rects], 2: [rects], ... }
+  // Storage of rects for ALL pages: { 1: [rects], 2: [rects], ... }
   const [allPageRects, setAllPageRects] = useState({});
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -115,9 +119,9 @@ export default function App() {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
-  // --- LOGIQUE MULTI-PAGE & PERSISTANCE ---
+  // --- MULTI-PAGE LOGIC & PERSISTENCE ---
 
-  // Sauvegarder les rects de la page actuelle quand ils changent
+  // Save current page rects when they change
   useEffect(() => {
     if (isPdf && currentPage > 0) {
         setAllPageRects(prev => ({
@@ -127,7 +131,7 @@ export default function App() {
     }
   }, [rects, isPdf, currentPage]);
 
-  // --- MOTEUR PDF ---
+  // --- PDF ENGINE ---
   
   const renderPdfPage = async (pdf, pageNum) => {
     setIsProcessing(true);
@@ -168,7 +172,7 @@ export default function App() {
         setCurrentPage(1);
         setAllPageRects({}); // Reset global rects
 
-        // Extraction Métadonnées
+        // Metadata Extraction
         const metadata = await pdf.getMetadata().catch(() => ({ info: {} }));
         setMetaInfo(prev => ({
             ...prev,
@@ -191,15 +195,15 @@ export default function App() {
   const changePage = (delta) => {
       const newPage = currentPage + delta;
       if (newPage >= 1 && newPage <= numPages && pdfDoc) {
-          // On change la page actuelle
+          // Change current page
           setCurrentPage(newPage);
-          // On charge les rects de la nouvelle page (ou vide si rien)
+          // Load rects for the new page (or empty if none)
           setRects(allPageRects[newPage] || []);
           renderPdfPage(pdfDoc, newPage);
       }
   };
 
-  // --- GESTION FICHIERS ---
+  // --- FILE MANAGEMENT ---
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -240,11 +244,11 @@ export default function App() {
     setMetaInfo({ width: 0, height: 0, mp: 0, author: 'N/A', producer: 'N/A', gps: 'N/A' });
   };
 
-  // --- RENDU GRAPHIQUE (Canvas) ---
+  // --- GRAPHICS RENDERING (Canvas) ---
   
-  // Fonction utilitaire pour dessiner les calques (utilisée par l'écran ET l'export)
+  // Utility function to draw overlays (used by both screen and export)
   const drawOverlays = (ctx, width, height, currentRects) => {
-      // Calque Filigrane (Toujours visible si configuré, pour l'export)
+      // Watermark Layer (Always visible if configured, for export)
       if (wmText && wmText.trim() !== "") {
         ctx.save();
         ctx.font = `bold ${wmSize}px Arial, sans-serif`;
@@ -255,19 +259,35 @@ export default function App() {
 
         const diagonal = Math.sqrt(width**2 + height**2);
         
+        // Calculate actual text width for dynamic spacing
+        const textMetrics = ctx.measureText(wmText);
+        const textRealWidth = textMetrics.width;
+        
+        // X Spacing: Text width + User configured space
+        const stepX = textRealWidth + wmSpacing;
+        // Y Spacing: Configured by user (Vertical Density)
+        const stepY = wmDensity;
+
         ctx.translate(width / 2, height / 2);
         ctx.rotate((wmRotate * Math.PI) / 180);
         ctx.translate(-width / 2, -height / 2);
 
-        for (let x = -diagonal; x < diagonal; x += wmDensity + wmSize) {
-          for (let y = -diagonal; y < diagonal; y += wmDensity) {
-            ctx.fillText(wmText, x, y);
+        // Loop with dynamic spacing AND staggered rows (quinconce)
+        let rowIndex = 0;
+        for (let y = -diagonal; y < diagonal; y += stepY) {
+          // Calculate stagger offset: Shift every odd row by half of the X step
+          const xOffset = (rowIndex % 2 === 1) ? stepX / 2 : 0;
+          
+          // Start drawing loop with extra margin on left to cover shift
+          for (let x = -diagonal - stepX; x < diagonal; x += stepX) {
+            ctx.fillText(wmText, x + xOffset, y);
           }
+          rowIndex++;
         }
         ctx.restore();
       }
 
-      // Calque Caviardage
+      // Redaction Layer
       ctx.fillStyle = "#000000";
       currentRects.forEach(rect => {
         ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
@@ -293,17 +313,17 @@ export default function App() {
       canvas.width = img.width;
       canvas.height = img.height;
 
-      // 1. Image de fond
+      // 1. Background Image
       ctx.drawImage(img, 0, 0);
 
-      // 2. Calques (Filigrane + Rects)
+      // 2. Overlays (Watermark + Rects)
       if (mode === 'watermark' || mode === 'metadata' || mode === 'redact') {
           const shouldShowWatermark = (mode === 'watermark');
           
           if (shouldShowWatermark) {
               drawOverlays(ctx, canvas.width, canvas.height, rects);
           } else {
-              // Si pas mode watermark, on dessine manuellement juste les rects
+              // If not in watermark mode, manually draw only the rects
               ctx.fillStyle = "#000000";
               rects.forEach(rect => {
                 ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
@@ -311,13 +331,13 @@ export default function App() {
           }
       }
     };
-  }, [imageSrc, mode, wmText, wmSize, wmOpacity, wmDensity, wmColor, wmRotate, rects]);
+  }, [imageSrc, mode, wmText, wmSize, wmOpacity, wmDensity, wmSpacing, wmColor, wmRotate, rects]);
 
   useEffect(() => {
     draw();
   }, [draw]);
 
-  // --- GESTION SOURIS ---
+  // --- MOUSE HANDLING ---
 
   const getPos = (e) => {
     if (!canvasRef.current) return { x: 0, y: 0 };
@@ -370,7 +390,7 @@ export default function App() {
 
   const undoLastRect = () => setRects(rects.slice(0, -1));
 
-  // --- EXPORT FICHIER (CORE FEATURE) ---
+  // --- FILE EXPORT (CORE FEATURE) ---
 
   const handleDownload = async () => {
     setIsProcessing(true);
@@ -378,7 +398,7 @@ export default function App() {
 
     try {
         if (isPdf && pdfDoc) {
-            // --- EXPORT PDF MULTI-PAGES ---
+            // --- MULTI-PAGE PDF EXPORT ---
             if (!window.jspdf) {
                 await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
             }
@@ -387,11 +407,11 @@ export default function App() {
             const doc = new jsPDF({ unit: 'px' });
             doc.deletePage(1); 
 
-            // BOUCLE SUR TOUTES LES PAGES
+            // LOOP OVER ALL PAGES
             for (let i = 1; i <= numPages; i++) {
                 setProgressText(`Traitement page ${i} sur ${numPages}...`);
                 
-                // 1. Rendu
+                // 1. Rendering
                 const page = await pdfDoc.getPage(i);
                 const viewport = page.getViewport({ scale: 2.0 });
                 
@@ -402,11 +422,11 @@ export default function App() {
                 
                 await page.render({ canvasContext: tempCtx, viewport }).promise;
                 
-                // 2. Modifs
+                // 2. Modifications
                 const rectsForThisPage = allPageRects[i] || [];
                 drawOverlays(tempCtx, tempCanvas.width, tempCanvas.height, rectsForThisPage);
                 
-                // 3. Ajout
+                // 3. Addition
                 const imgData = tempCanvas.toDataURL('image/jpeg', 0.85);
                 
                 doc.addPage([viewport.width, viewport.height], viewport.width > viewport.height ? 'l' : 'p');
@@ -417,7 +437,7 @@ export default function App() {
             doc.save(`stk_anon_full_${Date.now()}.pdf`);
             
         } else if (canvasRef.current) {
-            // --- EXPORT IMAGE SIMPLE ---
+            // --- SIMPLE IMAGE EXPORT ---
             canvasRef.current.toBlob((blob) => {
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
@@ -445,14 +465,14 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             
-            {/* LOGO PERSONNALISÉ */}
+            {/* CUSTOM LOGO */}
             <img 
                 src="/logo.png" 
                 alt="STK Logo" 
-                className="w-10 h-10 rounded shadow-lg border border-orange-500/20 object-cover"
+                className="w-10 h-10 rounded shadow-lg object-cover" // Removed border classes here
                 onError={(e) => {
                     e.target.onerror = null; 
-                    // Fallback visuel si le logo n'est pas trouvé
+                    // Visual fallback if logo is not found
                     e.target.src = "https://placehold.co/512x512/ea580c/white?text=STK";
                 }}
             />
@@ -551,7 +571,8 @@ export default function App() {
                     </div>
                     <Slider label="Taille" value={wmSize} min={10} max={200} onChange={setWmSize} />
                     <Slider label="Opacité" value={wmOpacity} min={0.1} max={1} step={0.05} onChange={setWmOpacity} />
-                    <Slider label="Densité" value={wmDensity} min={50} max={500} onChange={setWmDensity} />
+                    <Slider label="Densité Verticale" value={wmDensity} min={50} max={500} onChange={setWmDensity} />
+                    <Slider label="Espacement Texte" value={wmSpacing} min={20} max={500} onChange={setWmSpacing} />
                     <Slider label="Rotation" value={wmRotate} min={-90} max={90} onChange={setWmRotate} />
                   </div>
                 )}
@@ -585,7 +606,7 @@ export default function App() {
                           </span>
                         </div>
                         
-                        {/* NOUVELLES METADONNEES */}
+                        {/* NEW METADATA */}
                         <div className="grid grid-cols-2 gap-2 border-b border-neutral-800 pb-2">
                              <span className="text-neutral-500 flex items-center gap-1"><User size={10}/> Auteur</span>
                              <span className="text-neutral-200 text-right truncate" title={metaInfo.author}>{metaInfo.author}</span>
@@ -659,7 +680,7 @@ export default function App() {
                 />
               </div>
 
-              {/* PAGINATION CONTROL (Seulement si PDF et > 1 page) */}
+              {/* PAGINATION CONTROL (Only if PDF and > 1 page) */}
               {isPdf && numPages > 1 && (
                   <div className="mt-4 flex justify-center items-center gap-4 bg-neutral-900 border border-neutral-800 p-3 rounded-lg mx-auto">
                       <Button onClick={() => changePage(-1)} disabled={currentPage <= 1} variant="ghost" className="px-3">

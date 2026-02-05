@@ -4,13 +4,12 @@ const path = require('path');
 let mainWindow;
 
 function createWindow() {
-  // Récupérer la taille de l'écran principal pour adapter la fenêtre
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   mainWindow = new BrowserWindow({
     width: Math.min(1280, width),
     height: Math.min(900, height),
-    icon: path.join(__dirname, '../public/logo.png'), // Icône de l'app
+    icon: path.join(__dirname, '../public/logo.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -19,8 +18,14 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  // En PROD : on charge le fichier dist/index.html compilé
-  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  // Load the React app
+  // Development: localhost
+  // Production: built index.html
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL('http://localhost:5173');
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
 }
 
 app.whenReady().then(() => {

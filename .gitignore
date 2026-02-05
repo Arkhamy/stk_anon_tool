@@ -30,18 +30,18 @@ npm-debug.log
 yarn-debug.log*
 yarn-error.log*
 
-# Dépendances (TRÈS LOURD - NE JAMAIS ENVOYER)
+# Dépendances
 node_modules/
 
-# Build React (généré automatiquement)
+# Build React
 dist/
 dist-ssr/
 
-# Build Electron (généré automatiquement - contient les .exe)
+# Build Electron
 release/
 out/
 
-# Environnement (clés secrètes)
+# Environnement
 .env
 .env.local
 .env.*.local

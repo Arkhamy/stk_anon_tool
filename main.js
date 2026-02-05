@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1500,
     height: 800,
     title: "STK Anon",
     backgroundColor: '#0a0a0a',
@@ -13,7 +13,7 @@ const createWindow = () => {
     }
   });
 
-  // Charge l'application locale
+  // App
   win.loadURL('http://localhost:5173');
 };
 
