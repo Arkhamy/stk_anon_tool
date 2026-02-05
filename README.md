@@ -83,4 +83,8 @@ PDF.js & jsPDF : Pour le traitement de documents sans dépendances externes.
 
 Cet outil est fourni pour aider à la protection de la vie privée. L'utilisateur est responsable de vérifier que les documents caviardés ne contiennent plus d'informations sensibles avant diffusion.
 
+<<<<<<< HEAD
 Développé par STK - v1.7.0
+=======
+Développé par STK - v1.7.0
+>>>>>>> 88843af8fe3ce122886c6e437c6b9e06dd56ba76
